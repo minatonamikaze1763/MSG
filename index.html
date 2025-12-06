@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Party Background — Centered Image + Label</title>
+  <style>
+    /* ========== CONFIG (easy to tweak) ========== */
+    :root{
+      --bg-speed: 10s;           /* how fast the gradient cycles */
+      --hue-speed: 12s;          /* how fast the hue rotates */
+      --blink-speed: 0.9s;       /* blink (flash) duration */
+      --blink-opacity: 0.18;     /* how strong the blink overlay is */
+      --card-max-width: 540px;   /* max width of the image card */
+      --label-gap: 1rem;         /* gap between image and label */
+      --accent-shadow: 0 10px 30px rgba(0,0,0,0.35);
+    }
+
+    /* ========== Basic reset ========== */
+    *{box-sizing: border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      line-height:1.2;
+      color: #fff;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      overflow:hidden; /* keep focus on the party screen */
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      position:relative;
+      background:#111; /* fallback */
+    }
+
+    /* ========== Animated party background ========== */
+    /* large pseudo element holds an animated gradient */
+    body::before{
+      content:"";
+      position:fixed;
+      inset:0;
+      z-index:0;
+      /* colorful multi-stop gradient */
+      background: radial-gradient(1200px 700px at 10% 20%, rgba(255, 90, 122, .95) 0%, transparent 20%),
+                  radial-gradient(1100px 700px at 85% 80%, rgba(94, 92, 255, .95) 0%, transparent 20%),
+                  linear-gradient(135deg, rgba(255,200,55,.9), rgba(20,220,180,.9));
+      background-size: 200% 200%, 200% 200%, 200% 200%;
+      filter: saturate(1.1);
+      transform: translateZ(0);
+      animation: bg-move var(--bg-speed) linear infinite, hue-rotate var(--hue-speed) linear infinite;
+      will-change: transform, filter, background-position;
+    }
+
+    /* subtle blinking overlay to create "party strobe" effect */
+    body::after{
+      content:"";
+      position:fixed;
+      inset:0;
+      z-index:1;
+      background: radial-gradient(circle at 20% 10%, rgba(255,255,255,var(--blink-opacity)), transparent 30%),
+                  radial-gradient(circle at 80% 90%, rgba(255,255,255,var(--blink-opacity)), transparent 30%);
+      mix-blend-mode: screen;
+      pointer-events:none;
+      animation: blink var(--blink-speed) ease-in-out infinite;
+    }
+
+    /* If user prefers reduced motion, turn off heavy animation */
+    @media (prefers-reduced-motion: reduce) {
+      body::before, body::after { animation: none; }
+    }
+
+    /* ========== Keyframes ========== */
+    @keyframes bg-move{
+      0%   { background-position: 0% 0%, 100% 100%, 0% 100%; }
+      50%  { background-position: 100% 50%, 0% 0%, 100% 0%; }
+      100% { background-position: 0% 100%, 100% 100%, 0% 100%; }
+    }
+    @keyframes hue-rotate{
+      0%   { filter: hue-rotate(0deg) saturate(1); }
+      50%  { filter: hue-rotate(180deg) saturate(1.2); }
+      100% { filter: hue-rotate(360deg) saturate(1); }
+    }
+    @keyframes blink{
+      0%   { opacity: 0.95; }
+      8%   { opacity: 0.00; }
+      12%  { opacity: 0.95; }
+      20%  { opacity: 0.0; }
+      28%  { opacity: 0.95; }
+      100% { opacity: 0.95; }
+    }
+
+    /* ========== Content container (centered) ========== */
+    .stage{
+      position:relative;
+      z-index:2; /* above background */
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      gap:var(--label-gap);
+      padding: 2.25rem;
+      width: min(92vw, var(--card-max-width));
+      text-align:center;
+      -webkit-backdrop-filter: blur(6px);
+      backdrop-filter: blur(6px);
+    }
+
+    /* card around the image to help it pop */
+    .card{
+      background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+      border-radius: 18px;
+      padding: 14px;
+      box-shadow: var(--accent-shadow);
+      border: 1px solid rgba(255,255,255,0.06);
+      display:block;
+      max-width:100%;
+    }
+
+    .card img{
+      display:block;
+      width:100%;
+      height:auto;
+      border-radius: 12px;
+      object-fit:cover;
+      user-select:none;
+      -webkit-user-drag: none;
+      outline: 3px solid rgba(255,255,255,0.06);
+    }
+
+    .label{
+      font-weight:600;
+      font-size: clamp(1rem, 2.6vw, 1.35rem);
+      letter-spacing: 0.2px;
+      text-shadow: 0 2px 10px rgba(0,0,0,0.55);
+      display:flex;
+      gap:.6rem;
+      align-items:center;
+      justify-content:center;
+    }
+
+    /* small neon dot before label */
+    .label::before{
+      content:"";
+      width:10px;
+      height:10px;
+      border-radius:50%;
+      box-shadow: 0 0 12px rgba(255,255,255,0.9), 0 0 30px rgba(255,120,160,0.6);
+      background: linear-gradient(45deg, #fff, #ff4da6);
+      display:inline-block;
+    }
+
+    /* small helper: caption text */
+    .caption{
+      font-size:0.9rem;
+      opacity:0.95;
+      margin-top:6px;
+      color:rgba(255,255,255,0.92);
+    }
+
+    /* responsive niceties */
+    @media (max-width:460px){
+      body::before { background-size: 300% 300%, 300% 300%, 300% 300%; }
+      .card{ padding:10px; border-radius:14px }
+      .label{ font-size:1rem }
+    }
+  </style>
+</head>
+<body>
+  <main class="stage" role="main" aria-labelledby="title">
+    <!-- Card wrapping the image -->
+    <figure class="card" aria-hidden="false">
+      <!-- Replace this src with your image url or file path -->
+      <img src="https://i.pinimg.com/736x/1c/8f/b9/1c8fb9feaf1267dec6cfd42660f5e14d.jpg"
+           alt="MODDA GUDU IMAGE" />
+      <img src="https://instagram.fhyd19-1.fna.fbcdn.net/v/t51.2885-19/496752486_17906542203113598_6403923040873859067_n.jpg?stp=dst-jpg_s150x150_tt6&efg=eyJ2ZW5jb2RlX3RhZyI6InByb2ZpbGVfcGljLmRqYW5nby4xMDgwLmMyIn0&_nc_ht=instagram.fhyd19-1.fna.fbcdn.net&_nc_cat=106&_nc_oc=Q6cZ2QEVjCfc7lTTfz0NloXaQ3gy2V4MP3JO-P0LIJz1zfGdWAksDpVlPwnxjfTIWhcxGXo&_nc_ohc=2Zt_ZWKPJ4AQ7kNvwGV4Tzq&_nc_gid=pVanxRxzuMrzFD-yJF0utA&edm=AOQ1c0wBAAAA&ccb=7-5&oh=00_Aflf4HEQrMdJkQmoSgBxXv_WLj6f8T_rzN7PGoZqYueKZg&oe=69399400&_nc_sid=8b3546"
+           alt="MODDA GUDU IMAGE" />
+    </figure>
+
+    <!-- Label under the image -->
+    <div>
+      <div id="title" class="label" aria-live="polite">Let's party — lights on!</div>
+      <div class="caption">MODAA GUDU RA SAI NADHI :) </div>
+    </div>
+  </main>
+
+  <!-- Optional: small JS to let user click to pause animations (useful for accessibility) -->
+  <script>
+    (function(){
+      // toggle animations on spacebar or click (handy for demos)
+      let paused = false;
+      function togglePause() {
+        paused = !paused;
+        document.body.style.animationPlayState = paused ? 'paused' : 'running';
+        document.body.querySelectorAll('*').forEach(el => {
+          el.style.animationPlayState = paused ? 'paused' : 'running';
+        });
+      }
+      // click on the stage toggles (but avoid accidental toggles on mobile)
+      const stage = document.querySelector('.stage');
+      stage.addEventListener('click', (e) => {
+        // require double-click on touch devices to avoid accidental toggles
+        if (navigator.maxTouchPoints && navigator.maxTouchPoints > 0) {
+          // toggle only on double tap (quick two clicks)
+          if (!stage._lastTap || (performance.now() - stage._lastTap) > 350) {
+            stage._lastTap = performance.now();
+            return;
+          }
+        }
+        togglePause();
+      });
+      // keyboard: press "p" to pause/play
+      window.addEventListener('keydown', (e) => {
+        if (e.key.toLowerCase() === 'p') togglePause();
+      });
+    })();
+  </script>
+</body>
+</html>
